@@ -1,0 +1,37 @@
+{
+  "name": "stacks-p2e-platform-contracts",
+  "version": "1.0.0",
+  "description": "Smart contracts for Stacks P2E Gaming Platform",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "check": "clarinet check",
+    "console": "clarinet console",
+    "deploy:devnet": "clarinet integrate",
+    "deploy:testnet": "clarinet deploy --network testnet",
+    "deploy:mainnet": "clarinet deploy --network mainnet",
+    "format": "prettier --write \"**/*.{ts,js,json}\"",
+    "lint": "eslint tests/ --ext .ts"
+  },
+  "dependencies": {
+    "@hirosystems/clarinet-sdk": "^3.0.0",
+    "@stacks/transactions": "^6.15.0",
+    "@stacks/network": "^6.15.0"
+  },
+  "devDependencies": {
+    "vitest": "^1.0.0",
+    "vitest-environment-clarinet": "^2.0.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

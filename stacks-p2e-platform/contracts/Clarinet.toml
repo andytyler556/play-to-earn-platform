@@ -1,0 +1,85 @@
+[project]
+name = "stacks-p2e-platform"
+description = "Smart contracts for Stacks P2E Gaming Platform"
+authors = ["P2E Platform Team"]
+telemetry = false
+cache_dir = "./.cache"
+requirements = []
+clarinet_version = "2.0.0"
+
+[contracts.land-nft]
+path = "contracts/land-nft.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.blueprint-nft]
+path = "contracts/blueprint-nft.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.marketplace]
+path = "contracts/marketplace.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.game-rewards]
+path = "contracts/game-rewards.clar"
+clarity_version = 2
+epoch = 2.4
+
+[contracts.platform-token]
+path = "contracts/platform-token.clar"
+clarity_version = 2
+epoch = 2.4
+
+# Network configurations
+[network.testnet]
+stacks_node_rpc_address = "https://api.testnet.hiro.so"
+bitcoin_node_rpc_address = "https://blockstream.info/testnet/api"
+bitcoin_node_p2p_address = "testnet3.bitcoin.blockstream.info:18333"
+
+[network.testnet.deployment]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.testnet.deployment.land-nft]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.testnet.deployment.blueprint-nft]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.testnet.deployment.marketplace]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.testnet.deployment.game-rewards]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.testnet.deployment.platform-token]
+deployer = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+
+[network.devnet]
+stacks_node_rpc_address = "http://localhost:20443"
+stacks_api_address = "http://localhost:3999"
+bitcoin_node_rpc_address = "http://localhost:18443"
+bitcoin_node_p2p_address = "localhost:18444"
+
+[network.devnet.deployment]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[network.devnet.deployment.land-nft]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[network.devnet.deployment.blueprint-nft]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[network.devnet.deployment.marketplace]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[network.devnet.deployment.game-rewards]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[network.devnet.deployment.platform-token]
+deployer = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
