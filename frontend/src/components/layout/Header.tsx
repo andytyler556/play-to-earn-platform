@@ -66,7 +66,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => handleNavClick(item.view)}
+                  onClick={handleNavClick}
                   className={clsx(
                     'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
@@ -163,7 +163,7 @@ export function Header() {
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => handleNavClick(item.view)}
+                  onClick={handleNavClick}
                   className={clsx(
                     'flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors',
                     isActive
