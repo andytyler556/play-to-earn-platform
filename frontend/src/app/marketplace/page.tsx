@@ -1,10 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
-import { 
-  ShoppingBag, 
-  MapPin, 
-  Building, 
+import {
+  ShoppingBag,
+  MapPin,
+  Building,
   Filter,
   Search,
   TrendingUp,
@@ -17,6 +17,7 @@ import { MarketplaceStats } from '@/components/marketplace/MarketplaceStats';
 import { LandListings } from '@/components/marketplace/LandListings';
 import { BlueprintListings } from '@/components/marketplace/BlueprintListings';
 import { MarketplaceFilters } from '@/components/marketplace/MarketplaceFilters';
+import { useBlockchainData } from '@/hooks/useBlockchainData';
 
 type MarketplaceTab = 'land' | 'blueprints' | 'all';
 type ViewMode = 'grid' | 'list';
@@ -32,10 +33,18 @@ export default function MarketplacePage() {
   const [selectedRarity, setSelectedRarity] = useState<string>('');
   const [selectedTerrain, setSelectedTerrain] = useState<string>('');
 
+  // Get blockchain data
+  const { marketplaceListings, loading, errors, refresh } = useBlockchainData();
+
+  // Calculate counts from real data
+  const landCount = marketplaceListings.filter(item => item.type === 'land').length;
+  const blueprintCount = marketplaceListings.filter(item => item.type === 'blueprint').length;
+  const totalCount = marketplaceListings.length;
+
   const tabs = [
-    { id: 'all' as const, label: 'All Items', icon: ShoppingBag, count: 1247 },
-    { id: 'land' as const, label: 'Land', icon: MapPin, count: 856 },
-    { id: 'blueprints' as const, label: 'Blueprints', icon: Building, count: 391 },
+    { id: 'all' as const, label: 'All Items', icon: ShoppingBag, count: totalCount },
+    { id: 'land' as const, label: 'Land', icon: MapPin, count: landCount },
+    { id: 'blueprints' as const, label: 'Blueprints', icon: Building, count: blueprintCount },
   ];
 
   const sortOptions = [

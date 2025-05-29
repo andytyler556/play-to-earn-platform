@@ -3,39 +3,42 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Menu, 
-  X, 
-  Wallet, 
-  LogOut, 
-  User, 
+import {
+  Menu,
+  X,
+  Wallet,
+  LogOut,
+  User,
   Coins,
   MapPin,
   Trophy,
-  ShoppingBag
+  ShoppingBag,
+  Home,
+  Package,
+  Calendar,
+  Crown
 } from 'lucide-react';
 import { useWallet } from '@/components/providers/WalletProvider';
-import { useGameView } from '@/components/providers/GameProvider';
 import { connectWallet, shortenAddress } from '@/lib/stacks';
 import { WalletButton } from '@/components/ui/WalletButton';
 import { Button } from '@/components/ui/Button';
 import clsx from 'clsx';
 
 const navigation = [
-  { name: 'World', href: '/', icon: MapPin, view: 'world' as const },
-  { name: 'Inventory', href: '/inventory', icon: User, view: 'inventory' as const },
-  { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag, view: 'marketplace' as const },
-  { name: 'Competitions', href: '/competitions', icon: Trophy, view: 'competitions' as const },
+  { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Land', href: '/land', icon: MapPin },
+  { name: 'Blueprints', href: '/blueprints', icon: Package },
+  { name: 'Marketplace', href: '/marketplace', icon: ShoppingBag },
+  { name: 'Events', href: '/events', icon: Calendar },
+  { name: 'Premium', href: '/premium', icon: Crown },
 ];
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { isConnected, address, stxBalance, tokenBalance, disconnect } = useWallet();
-  const { setView } = useGameView();
 
-  const handleNavClick = (view: 'world' | 'inventory' | 'marketplace' | 'competitions') => {
-    setView(view);
+  const handleNavClick = () => {
     setMobileMenuOpen(false);
   };
 
@@ -58,12 +61,12 @@ export function Header() {
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => handleNavClick(item.view)}
+                  onClick={handleNavClick}
                   className={clsx(
                     'inline-flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                     isActive
@@ -104,7 +107,7 @@ export function Header() {
                     <Wallet className="w-4 h-4" />
                     <span className="hidden sm:inline">{shortenAddress(address!)}</span>
                   </Button>
-                  
+
                   {/* Dropdown Menu */}
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                     <div className="py-1">
@@ -155,12 +158,12 @@ export function Header() {
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
-              
+
               return (
                 <Link
                   key={item.name}
                   href={item.href}
-                  onClick={() => handleNavClick(item.view)}
+                  onClick={handleNavClick}
                   className={clsx(
                     'flex items-center px-3 py-2 text-base font-medium rounded-md transition-colors',
                     isActive
@@ -173,7 +176,7 @@ export function Header() {
                 </Link>
               );
             })}
-            
+
             {/* Mobile Wallet Info */}
             {isConnected && (
               <div className="px-3 py-2 border-t border-gray-200 mt-2">
