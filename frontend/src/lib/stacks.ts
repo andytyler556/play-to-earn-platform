@@ -30,6 +30,90 @@ import { StacksApiSocketClient } from '@stacks/blockchain-api-client';
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 export const userSession = new UserSession({ appConfig });
 
+// ============================================================================
+// ENVIRONMENT VALIDATION & SECURITY
+// ============================================================================
+
+/**
+ * Validate environment variables on startup
+ * Ensures all required variables are present and properly configured
+ */
+export function validateEnvironmentVariables(): void {
+  const requiredPublicVars = [
+    'NEXT_PUBLIC_NETWORK',
+    'NEXT_PUBLIC_STACKS_API_URL',
+    'NEXT_PUBLIC_USE_REAL_BLOCKCHAIN'
+  ];
+
+  const requiredContractVars = [
+    'NEXT_PUBLIC_PLATFORM_TOKEN_CONTRACT',
+    'NEXT_PUBLIC_LAND_NFT_CONTRACT',
+    'NEXT_PUBLIC_BLUEPRINT_NFT_CONTRACT',
+    'NEXT_PUBLIC_MARKETPLACE_CONTRACT',
+    'NEXT_PUBLIC_GAME_REWARDS_CONTRACT'
+  ];
+
+  // Check required public variables
+  const missingPublic = requiredPublicVars.filter(varName => !process.env[varName]);
+  if (missingPublic.length > 0) {
+    console.error('❌ Missing required environment variables:', missingPublic);
+    throw new Error(`Missing required environment variables: ${missingPublic.join(', ')}`);
+  }
+
+  // Check contract addresses if real blockchain is enabled
+  const useRealBlockchain = process.env.NEXT_PUBLIC_USE_REAL_BLOCKCHAIN === 'true';
+  if (useRealBlockchain) {
+    const missingContracts = requiredContractVars.filter(varName => {
+      const value = process.env[varName];
+      return !value || value.includes('YOUR_ADDRESS') || value.includes('your-');
+    });
+
+    if (missingContracts.length > 0) {
+      console.warn('⚠️  Contract addresses not configured:', missingContracts);
+      console.warn('Real blockchain features may not work properly');
+    }
+  }
+
+  // Validate network configuration
+  const network = process.env.NEXT_PUBLIC_NETWORK;
+  if (network !== 'testnet' && network !== 'mainnet' && network !== 'devnet') {
+    throw new Error(`Invalid network: ${network}. Must be 'testnet', 'mainnet', or 'devnet'`);
+  }
+
+  // Validate API URL format
+  const apiUrl = process.env.NEXT_PUBLIC_STACKS_API_URL;
+  if (!apiUrl?.startsWith('https://') && !apiUrl?.startsWith('http://localhost')) {
+    throw new Error('NEXT_PUBLIC_STACKS_API_URL must use HTTPS or localhost');
+  }
+
+  console.log('✅ Environment variables validated successfully');
+}
+
+/**
+ * Security audit function to check for exposed sensitive data
+ */
+export function performSecurityAudit(): void {
+  const sensitivePatterns = [
+    /mnemonic/i,
+    /private.?key/i,
+    /secret/i,
+    /password/i,
+    /api.?key/i
+  ];
+
+  // Check if any sensitive data is exposed in public environment variables
+  const exposedSensitive = Object.keys(process.env)
+    .filter(key => key.startsWith('NEXT_PUBLIC_'))
+    .filter(key => sensitivePatterns.some(pattern => pattern.test(key)));
+
+  if (exposedSensitive.length > 0) {
+    console.error('🚨 SECURITY ALERT: Sensitive data exposed in public environment variables:', exposedSensitive);
+    throw new Error('Security violation: Sensitive data in public environment variables');
+  }
+
+  console.log('🛡️  Security audit passed');
+}
+
 // Network configuration
 export const getNetwork = (): StacksNetwork => {
   const networkType = process.env.NEXT_PUBLIC_NETWORK || 'testnet';

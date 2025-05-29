@@ -5,13 +5,30 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Environment variables
+# Environment variables - SECURITY CRITICAL
 .env
+.env.*
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
+.env.testnet
+.env.mainnet
 .env.example
+
+# Sensitive files - NEVER COMMIT
+*.key
+*.pem
+*.p12
+*.pfx
+private-keys/
+secrets/
+mnemonics.txt
+wallet-backup.*
+deployment-keys.*
 
 # Build outputs
 dist/
