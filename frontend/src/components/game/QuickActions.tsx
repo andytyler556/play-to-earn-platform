@@ -1,11 +1,11 @@
 'use client';
 
 import React from 'react';
-import { 
-  ShoppingBag, 
-  Trophy, 
-  Plus, 
-  Zap, 
+import {
+  ShoppingBag,
+  Trophy,
+  Plus,
+  Zap,
   Gift,
   Clock,
   Star,
@@ -14,11 +14,27 @@ import {
   Calendar
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { useCompetitions } from '@/components/providers/GameProvider';
+import { LandPlot, Blueprint } from '@/lib/game-data';
 
-export function QuickActions() {
-  const { competitions } = useCompetitions();
-  const activeCompetitions = competitions.filter(comp => comp.isActive);
+interface QuickActionsProps {
+  landPlots: LandPlot[];
+  blueprints: Blueprint[];
+  loading: boolean;
+}
+
+export function QuickActions({ landPlots, blueprints, loading }: QuickActionsProps) {
+  // Mock active competitions for now
+  const activeCompetitions = [
+    {
+      id: '1',
+      name: 'Building Contest',
+      description: 'Build the most efficient city layout',
+      participants: 45,
+      maxParticipants: 100,
+      prizePool: 500,
+      isActive: true
+    }
+  ];
 
   return (
     <div className="space-y-6">
@@ -47,7 +63,7 @@ export function QuickActions() {
           <h3 className="text-lg font-semibold text-gray-900">Active Competitions</h3>
           <Trophy className="w-5 h-5 text-yellow-500" />
         </div>
-        
+
         {activeCompetitions.length > 0 ? (
           <div className="space-y-4">
             {activeCompetitions.slice(0, 2).map((competition) => (
@@ -76,7 +92,7 @@ export function QuickActions() {
                 </Button>
               </div>
             ))}
-            
+
             {activeCompetitions.length > 2 && (
               <Button variant="ghost" size="sm" fullWidth>
                 View All ({activeCompetitions.length})
@@ -98,7 +114,7 @@ export function QuickActions() {
           <h3 className="text-lg font-semibold text-gray-900">Daily Progress</h3>
           <Calendar className="w-5 h-5 text-blue-500" />
         </div>
-        
+
         <div className="space-y-4">
           {/* Daily Quest */}
           <div className="bg-blue-50 rounded-lg p-3">
@@ -120,12 +136,16 @@ export function QuickActions() {
             </div>
             <div className="text-xs text-green-800">
               <div className="flex justify-between">
-                <span>Generated today:</span>
-                <span className="font-medium">247 resources</span>
+                <span>Total resources:</span>
+                <span className="font-medium">
+                  {landPlots.reduce((sum, land) => sum + land.resources.reduce((rSum, r) => rSum + r.currentAmount, 0), 0)}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Rate per hour:</span>
-                <span className="font-medium">12/hour</span>
+                <span className="font-medium">
+                  {landPlots.reduce((sum, land) => sum + land.resources.reduce((rSum, r) => rSum + r.regenerationRate, 0), 0)}/hour
+                </span>
               </div>
             </div>
           </div>
@@ -154,21 +174,25 @@ export function QuickActions() {
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
         <div className="space-y-3">
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span className="text-gray-600">Built residential building</span>
-            <span className="text-gray-400 text-xs ml-auto">2h ago</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span className="text-gray-600">Purchased land plot (5, 3)</span>
-            <span className="text-gray-400 text-xs ml-auto">1d ago</span>
-          </div>
-          <div className="flex items-center space-x-3 text-sm">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span className="text-gray-600">Joined building competition</span>
-            <span className="text-gray-400 text-xs ml-auto">2d ago</span>
-          </div>
+          {landPlots.slice(0, 2).map((land, index) => (
+            <div key={land.id} className="flex items-center space-x-3 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-gray-600">Acquired {land.terrain} plot ({land.x}, {land.y})</span>
+              <span className="text-gray-400 text-xs ml-auto">{index + 1}d ago</span>
+            </div>
+          ))}
+          {blueprints.slice(0, 1).map((blueprint, index) => (
+            <div key={blueprint.id} className="flex items-center space-x-3 text-sm">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <span className="text-gray-600">Acquired {blueprint.buildingType} blueprint</span>
+              <span className="text-gray-400 text-xs ml-auto">{index + 2}d ago</span>
+            </div>
+          ))}
+          {landPlots.length === 0 && blueprints.length === 0 && (
+            <div className="text-center py-4 text-gray-500">
+              <span className="text-sm">No recent activity</span>
+            </div>
+          )}
         </div>
       </div>
     </div>
