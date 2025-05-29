@@ -33,8 +33,15 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
         console.log('✅ Environment validation passed');
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Environment validation failed';
-        errors.push(message);
-        console.error('❌ Environment validation failed:', message);
+
+        // In development, show warnings instead of blocking errors for missing env vars
+        if (process.env.NODE_ENV === 'development' && message.includes('Missing required environment variables')) {
+          warnings.push(`Development warning: ${message}`);
+          console.warn('⚠️ Development warning:', message);
+        } else {
+          errors.push(message);
+          console.error('❌ Environment validation failed:', message);
+        }
       }
 
       try {
@@ -108,7 +115,7 @@ export function SecurityProvider({ children }: SecurityProviderProps) {
               <h3 className="text-lg font-medium text-red-800">Security Configuration Error</h3>
             </div>
           </div>
-          
+
           <div className="mb-4">
             <p className="text-sm text-red-700 mb-3">
               The application cannot start due to security configuration issues:
