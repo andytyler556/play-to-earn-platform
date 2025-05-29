@@ -7,5 +7,5 @@ deployment_fee_rate = 10
 [[network.accounts]]
 name = "deployer"
 address = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
-# Note: You'll need to add your private key or mnemonic for actual deployment
-# For security, use environment variables or Clarinet's key management
+mnemonic = "vessel alert business involve shoulder punch rescue stem charge peanut gentle cup omit dragon clerk tumble sight toast false milk obtain curious fatal toss"
+balance = 100000000000000

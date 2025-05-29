@@ -24,7 +24,7 @@ import {
   broadcastTransaction,
   TxBroadcastResult,
 } from '@stacks/transactions';
-// import { StacksApiSocketClient } from '@stacks/blockchain-api-client';
+import { StacksApiSocketClient } from '@stacks/blockchain-api-client';
 
 // Configuration
 const appConfig = new AppConfig(['store_write', 'publish_data']);
@@ -341,10 +341,9 @@ export const transferTokens = async (
 
 // WebSocket for real-time updates
 export const createSocketClient = () => {
-  // return new StacksApiSocketClient({
-  //   url: getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://'),
-  // });
-  return null; // Temporarily disabled for local preview
+  return new StacksApiSocketClient({
+    url: getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://'),
+  });
 };
 
 // Utility functions
@@ -366,4 +365,122 @@ export const getExplorerUrl = (txId: string): string => {
     ? 'https://explorer.stacks.co'
     : 'https://explorer.stacks.co/?chain=testnet';
   return `${baseUrl}/txid/${txId}`;
+};
+
+// ============================================================================
+// REAL CONTRACT INTERACTIONS
+// ============================================================================
+
+// Contract addresses (will be updated after deployment)
+export const CONTRACT_ADDRESSES = {
+  PLATFORM_TOKEN: process.env.NEXT_PUBLIC_PLATFORM_TOKEN_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.platform-token',
+  LAND_NFT: process.env.NEXT_PUBLIC_LAND_NFT_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.land-nft',
+  BLUEPRINT_NFT: process.env.NEXT_PUBLIC_BLUEPRINT_NFT_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.blueprint-nft',
+  MARKETPLACE: process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.marketplace',
+  GAME_REWARDS: process.env.NEXT_PUBLIC_GAME_REWARDS_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.game-rewards',
+};
+
+// Real STX balance fetching
+export const getRealSTXBalance = async (address: string): Promise<number> => {
+  try {
+    const response = await fetch(`${getApiUrl()}/extended/v1/address/${address}/balances`);
+    const data = await response.json();
+    return parseInt(data.stx.balance) / 1000000; // Convert from microSTX
+  } catch (error) {
+    console.error('Error fetching STX balance:', error);
+    return 0;
+  }
+};
+
+// Real token balance fetching
+export const getRealTokenBalance = async (address: string): Promise<number> => {
+  try {
+    const [contractAddress, contractName] = CONTRACT_ADDRESSES.PLATFORM_TOKEN.split('.');
+    const functionArgs = [standardPrincipalCV(address)];
+
+    const response = await fetch(`${getApiUrl()}/v2/contracts/call-read/${contractAddress}/${contractName}/get-balance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: address,
+        arguments: functionArgs.map(arg => cvToHex(arg)),
+      }),
+    });
+
+    const result = await response.json();
+    if (result.okay) {
+      const balance = hexToCV(result.result);
+      return parseInt(balance.value.toString()) / 1000000; // Assuming 6 decimals
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error fetching token balance:', error);
+    return 0;
+  }
+};
+
+// Real land NFT data fetching
+export const getRealLandData = async (landId: number): Promise<any> => {
+  try {
+    const [contractAddress, contractName] = CONTRACT_ADDRESSES.LAND_NFT.split('.');
+    const functionArgs = [uintCV(landId)];
+
+    const response = await fetch(`${getApiUrl()}/v2/contracts/call-read/${contractAddress}/${contractName}/get-land-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: contractAddress,
+        arguments: functionArgs.map(arg => cvToHex(arg)),
+      }),
+    });
+
+    const result = await response.json();
+    if (result.okay) {
+      return hexToCV(result.result);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching land data:', error);
+    return null;
+  }
+};
+
+// Real land minting transaction
+export const mintRealLand = async (
+  x: number,
+  y: number,
+  terrain: string,
+  rarity: string,
+  onFinish?: (data: any) => void
+): Promise<void> => {
+  const [contractAddress, contractName] = CONTRACT_ADDRESSES.LAND_NFT.split('.');
+
+  const functionArgs = [
+    intCV(x),
+    intCV(y),
+    stringAsciiCV(terrain),
+    stringAsciiCV(rarity),
+  ];
+
+  const txOptions = {
+    contractAddress,
+    contractName,
+    functionName: 'mint-land',
+    functionArgs,
+    network: getNetwork(),
+    appDetails: {
+      name: 'P2E Gaming Platform',
+      icon: window.location.origin + '/favicon.ico',
+    },
+    onFinish: (data: any) => {
+      console.log('Land minting transaction:', data);
+      if (onFinish) onFinish(data);
+    },
+  };
+
+  await openContractCall(txOptions);
 };

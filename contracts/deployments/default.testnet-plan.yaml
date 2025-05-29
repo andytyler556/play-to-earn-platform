@@ -1,0 +1,45 @@
+---
+id: 0
+name: P2E Gaming Platform Testnet Deployment
+network: testnet
+stacks-node: "https://api.testnet.hiro.so"
+bitcoin-node: "https://blockstream.info/testnet/api"
+plan:
+  batches:
+    - id: 0
+      transactions:
+        - contract-publish:
+            contract-name: platform-token
+            expected-sender: ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA
+            cost: 50000
+            path: contracts/platform-token.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: land-nft
+            expected-sender: ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA
+            cost: 60000
+            path: contracts/land-nft.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: blueprint-nft
+            expected-sender: ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA
+            cost: 55000
+            path: contracts/blueprint-nft.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: marketplace
+            expected-sender: ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA
+            cost: 70000
+            path: contracts/marketplace.clar
+            anchor-block-only: true
+            clarity-version: 2
+        - contract-publish:
+            contract-name: game-rewards
+            expected-sender: ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA
+            cost: 80000
+            path: contracts/game-rewards.clar
+            anchor-block-only: true
+            clarity-version: 2
