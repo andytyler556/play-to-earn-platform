@@ -1,0 +1,64 @@
+[network]
+name = "devnet"
+node_rpc_address = "http://localhost:20443"
+deployment_fee_rate = 10
+
+[[network.accounts]]
+name = "deployer"
+address = "ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"
+balance = 100000000000000
+mnemonic = "twice kind fence tip hidden tilt action fragile skin nothing glory cousin green tomorrow spring wrist shed math olympic multiply hip blue scout claw"
+
+[[network.accounts]]
+name = "wallet_1"
+address = "ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5"
+balance = 100000000000000
+mnemonic = "sell invite acquire kitten bamboo drastic jelly vivid peace spawn twice guilt pave pen trash pretty park cube fragile unaware remain midnight betray rebuild"
+
+[[network.accounts]]
+name = "wallet_2"
+address = "ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG"
+balance = 100000000000000
+mnemonic = "hold excess usual excess ring elephant install account glad dry fragile donkey gaze humble truck breeze nation gasp vacuum limb head keep delay hospital"
+
+[[network.accounts]]
+name = "wallet_3"
+address = "ST2JHG361ZXG51QTKY2NQCVBPPRRE2KZB1HR05NNC"
+balance = 100000000000000
+mnemonic = "cycle puppy glare enroll cost improve round trend wrist mushroom scorpion tower claim oppose clever elephant dinosaur eight problem before frozen dune wagon high"
+
+[[network.accounts]]
+name = "wallet_4"
+address = "ST2NEB84ASENDXKYGJPQW86YXQCEFEX2ZQPG87ND"
+balance = 100000000000000
+mnemonic = "board list obtain sugar hour worth raven scout denial thunder horse logic fury scorpion fold genuine phrase wealth news aim below celery when cabin"
+
+[[network.accounts]]
+name = "wallet_5"
+address = "ST2REHHS5J3CERCRBEPMGH7921Q6PYKAADT7JP2VB"
+balance = 100000000000000
+mnemonic = "anchor border keen hug gear invest student trial praise lot discover guard century once same stadium submit worth visa power grid gloom spell cushion"
+
+[[network.accounts]]
+name = "wallet_6"
+address = "ST3AM1A56AK2C1XAFJ4115ZSV26EB49BVQ10MGCS0"
+balance = 100000000000000
+mnemonic = "lazy panel flee dog current will artist split duration greedy future trend pilot drill spread oil actual dizzy cruel device grab other spatial blind"
+
+[[network.accounts]]
+name = "wallet_7"
+address = "ST3PF13W7Z0RRM42A8VZRVFQ75SV1K26RXEP8YGKJ"
+balance = 100000000000000
+mnemonic = "skip sight similar tail element stadium seed kangaroo suspend nerve titan movie dizzy thunder meadow guide ozone unique aspect enforce mercy shallow cloth review"
+
+[[network.accounts]]
+name = "wallet_8"
+address = "ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP"
+balance = 100000000000000
+mnemonic = "female adjust gallery certain visit token during great side clown fitness like hurt clip knife warm bench start reunion globe detail dream depend fortune"
+
+[[network.accounts]]
+name = "wallet_9"
+address = "STNHKEPYEPJ8ET55ZZ0M5A34J0R3N5FM2CMMMAZ6"
+balance = 100000000000000
+mnemonic = "shadow private easily thought say logic fault paddle word top book during ignore notable orange flight clock image wealth health outside kitten belt reform"

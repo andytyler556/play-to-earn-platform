@@ -3,11 +3,14 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import { 
-  userSession, 
-  isWalletConnected, 
+import {
+  userSession,
+  isWalletConnected,
   getUserAddress,
   getTokenBalance,
+  getRealSTXBalance,
+  getRealTokenBalance,
+  createSocketClient,
 } from '@/lib/stacks';
 import toast from 'react-hot-toast';
 
@@ -19,7 +22,7 @@ interface WalletState {
   tokenBalance: number;
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   connect: () => void;
   disconnect: () => void;
@@ -42,11 +45,11 @@ export const useWalletStore = create<WalletState>()(
       try {
         const connected = isWalletConnected();
         const address = getUserAddress();
-        
-        set({ 
-          isConnected: connected, 
+
+        set({
+          isConnected: connected,
           address,
-          error: null 
+          error: null
         });
 
         if (connected && address) {
@@ -63,12 +66,12 @@ export const useWalletStore = create<WalletState>()(
     disconnect: () => {
       try {
         userSession.signUserOut('/');
-        set({ 
-          isConnected: false, 
-          address: null, 
+        set({
+          isConnected: false,
+          address: null,
           stxBalance: 0,
           tokenBalance: 0,
-          error: null 
+          error: null
         });
         toast.success('Wallet disconnected');
       } catch (error) {
@@ -82,28 +85,44 @@ export const useWalletStore = create<WalletState>()(
       if (!address) return;
 
       set({ isLoading: true });
-      
+
       try {
-        // Get STX balance from API
-        const response = await fetch(`${process.env.NEXT_PUBLIC_STACKS_API_URL}/v1/addresses/${address}`);
-        const data = await response.json();
-        const stxBalance = parseInt(data.balance) / 1000000; // Convert from microSTX
+        const useRealBlockchain = process.env.NEXT_PUBLIC_USE_REAL_BLOCKCHAIN === 'true';
 
-        // Get platform token balance
-        const tokenBalanceResult = await getTokenBalance(address);
-        const tokenBalance = tokenBalanceResult?.value || 0;
+        if (useRealBlockchain) {
+          // Use real blockchain data
+          const [stxBalance, tokenBalance] = await Promise.all([
+            getRealSTXBalance(address),
+            getRealTokenBalance(address),
+          ]);
 
-        set({ 
-          stxBalance, 
-          tokenBalance: tokenBalance / 1000000, // Assuming 6 decimals
-          isLoading: false,
-          error: null 
-        });
+          set({
+            stxBalance,
+            tokenBalance,
+            isLoading: false,
+            error: null
+          });
+        } else {
+          // Fallback to mock data for development
+          const response = await fetch(`${process.env.NEXT_PUBLIC_STACKS_API_URL}/v1/addresses/${address}`);
+          const data = await response.json();
+          const stxBalance = parseInt(data.balance) / 1000000;
+
+          const tokenBalanceResult = await getTokenBalance(address);
+          const tokenBalance = tokenBalanceResult?.value || 0;
+
+          set({
+            stxBalance,
+            tokenBalance: tokenBalance / 1000000,
+            isLoading: false,
+            error: null
+          });
+        }
       } catch (error) {
         console.error('Error fetching balances:', error);
-        set({ 
-          isLoading: false, 
-          error: 'Failed to fetch balances' 
+        set({
+          isLoading: false,
+          error: 'Failed to fetch balances'
         });
       }
     },

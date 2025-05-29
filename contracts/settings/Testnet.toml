@@ -1,0 +1,11 @@
+[network]
+name = "testnet"
+node_rpc_address = "https://api.testnet.hiro.so"
+deployment_fee_rate = 10
+
+# Your testnet account
+[[network.accounts]]
+name = "deployer"
+address = "ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA"
+mnemonic = "vessel alert business involve shoulder punch rescue stem charge peanut gentle cup omit dragon clerk tumble sight toast false milk obtain curious fatal toss"
+balance = 100000000000000

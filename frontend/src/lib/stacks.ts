@@ -24,11 +24,95 @@ import {
   broadcastTransaction,
   TxBroadcastResult,
 } from '@stacks/transactions';
-// import { StacksApiSocketClient } from '@stacks/blockchain-api-client';
+import { StacksApiSocketClient } from '@stacks/blockchain-api-client';
 
 // Configuration
 const appConfig = new AppConfig(['store_write', 'publish_data']);
 export const userSession = new UserSession({ appConfig });
+
+// ============================================================================
+// ENVIRONMENT VALIDATION & SECURITY
+// ============================================================================
+
+/**
+ * Validate environment variables on startup
+ * Ensures all required variables are present and properly configured
+ */
+export function validateEnvironmentVariables(): void {
+  const requiredPublicVars = [
+    'NEXT_PUBLIC_NETWORK',
+    'NEXT_PUBLIC_STACKS_API_URL',
+    'NEXT_PUBLIC_USE_REAL_BLOCKCHAIN'
+  ];
+
+  const requiredContractVars = [
+    'NEXT_PUBLIC_PLATFORM_TOKEN_CONTRACT',
+    'NEXT_PUBLIC_LAND_NFT_CONTRACT',
+    'NEXT_PUBLIC_BLUEPRINT_NFT_CONTRACT',
+    'NEXT_PUBLIC_MARKETPLACE_CONTRACT',
+    'NEXT_PUBLIC_GAME_REWARDS_CONTRACT'
+  ];
+
+  // Check required public variables
+  const missingPublic = requiredPublicVars.filter(varName => !process.env[varName]);
+  if (missingPublic.length > 0) {
+    console.error('❌ Missing required environment variables:', missingPublic);
+    throw new Error(`Missing required environment variables: ${missingPublic.join(', ')}`);
+  }
+
+  // Check contract addresses if real blockchain is enabled
+  const useRealBlockchain = process.env.NEXT_PUBLIC_USE_REAL_BLOCKCHAIN === 'true';
+  if (useRealBlockchain) {
+    const missingContracts = requiredContractVars.filter(varName => {
+      const value = process.env[varName];
+      return !value || value.includes('YOUR_ADDRESS') || value.includes('your-');
+    });
+
+    if (missingContracts.length > 0) {
+      console.warn('⚠️  Contract addresses not configured:', missingContracts);
+      console.warn('Real blockchain features may not work properly');
+    }
+  }
+
+  // Validate network configuration
+  const network = process.env.NEXT_PUBLIC_NETWORK;
+  if (network !== 'testnet' && network !== 'mainnet' && network !== 'devnet') {
+    throw new Error(`Invalid network: ${network}. Must be 'testnet', 'mainnet', or 'devnet'`);
+  }
+
+  // Validate API URL format
+  const apiUrl = process.env.NEXT_PUBLIC_STACKS_API_URL;
+  if (!apiUrl?.startsWith('https://') && !apiUrl?.startsWith('http://localhost')) {
+    throw new Error('NEXT_PUBLIC_STACKS_API_URL must use HTTPS or localhost');
+  }
+
+  console.log('✅ Environment variables validated successfully');
+}
+
+/**
+ * Security audit function to check for exposed sensitive data
+ */
+export function performSecurityAudit(): void {
+  const sensitivePatterns = [
+    /mnemonic/i,
+    /private.?key/i,
+    /secret/i,
+    /password/i,
+    /api.?key/i
+  ];
+
+  // Check if any sensitive data is exposed in public environment variables
+  const exposedSensitive = Object.keys(process.env)
+    .filter(key => key.startsWith('NEXT_PUBLIC_'))
+    .filter(key => sensitivePatterns.some(pattern => pattern.test(key)));
+
+  if (exposedSensitive.length > 0) {
+    console.error('🚨 SECURITY ALERT: Sensitive data exposed in public environment variables:', exposedSensitive);
+    throw new Error('Security violation: Sensitive data in public environment variables');
+  }
+
+  console.log('🛡️  Security audit passed');
+}
 
 // Network configuration
 export const getNetwork = (): StacksNetwork => {
@@ -341,10 +425,9 @@ export const transferTokens = async (
 
 // WebSocket for real-time updates
 export const createSocketClient = () => {
-  // return new StacksApiSocketClient({
-  //   url: getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://'),
-  // });
-  return null; // Temporarily disabled for local preview
+  return new StacksApiSocketClient({
+    url: getApiUrl().replace('https://', 'wss://').replace('http://', 'ws://'),
+  });
 };
 
 // Utility functions
@@ -366,4 +449,122 @@ export const getExplorerUrl = (txId: string): string => {
     ? 'https://explorer.stacks.co'
     : 'https://explorer.stacks.co/?chain=testnet';
   return `${baseUrl}/txid/${txId}`;
+};
+
+// ============================================================================
+// REAL CONTRACT INTERACTIONS
+// ============================================================================
+
+// Contract addresses (will be updated after deployment)
+export const CONTRACT_ADDRESSES = {
+  PLATFORM_TOKEN: process.env.NEXT_PUBLIC_PLATFORM_TOKEN_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.platform-token',
+  LAND_NFT: process.env.NEXT_PUBLIC_LAND_NFT_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.land-nft',
+  BLUEPRINT_NFT: process.env.NEXT_PUBLIC_BLUEPRINT_NFT_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.blueprint-nft',
+  MARKETPLACE: process.env.NEXT_PUBLIC_MARKETPLACE_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.marketplace',
+  GAME_REWARDS: process.env.NEXT_PUBLIC_GAME_REWARDS_CONTRACT || 'ST34EECPKYV8K5P8HBXZ2KDB895V3MCDTR4P4QMAA.game-rewards',
+};
+
+// Real STX balance fetching
+export const getRealSTXBalance = async (address: string): Promise<number> => {
+  try {
+    const response = await fetch(`${getApiUrl()}/extended/v1/address/${address}/balances`);
+    const data = await response.json();
+    return parseInt(data.stx.balance) / 1000000; // Convert from microSTX
+  } catch (error) {
+    console.error('Error fetching STX balance:', error);
+    return 0;
+  }
+};
+
+// Real token balance fetching
+export const getRealTokenBalance = async (address: string): Promise<number> => {
+  try {
+    const [contractAddress, contractName] = CONTRACT_ADDRESSES.PLATFORM_TOKEN.split('.');
+    const functionArgs = [standardPrincipalCV(address)];
+
+    const response = await fetch(`${getApiUrl()}/v2/contracts/call-read/${contractAddress}/${contractName}/get-balance`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: address,
+        arguments: functionArgs.map(arg => cvToHex(arg)),
+      }),
+    });
+
+    const result = await response.json();
+    if (result.okay) {
+      const balance = hexToCV(result.result);
+      return parseInt(balance.value.toString()) / 1000000; // Assuming 6 decimals
+    }
+    return 0;
+  } catch (error) {
+    console.error('Error fetching token balance:', error);
+    return 0;
+  }
+};
+
+// Real land NFT data fetching
+export const getRealLandData = async (landId: number): Promise<any> => {
+  try {
+    const [contractAddress, contractName] = CONTRACT_ADDRESSES.LAND_NFT.split('.');
+    const functionArgs = [uintCV(landId)];
+
+    const response = await fetch(`${getApiUrl()}/v2/contracts/call-read/${contractAddress}/${contractName}/get-land-data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: contractAddress,
+        arguments: functionArgs.map(arg => cvToHex(arg)),
+      }),
+    });
+
+    const result = await response.json();
+    if (result.okay) {
+      return hexToCV(result.result);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error fetching land data:', error);
+    return null;
+  }
+};
+
+// Real land minting transaction
+export const mintRealLand = async (
+  x: number,
+  y: number,
+  terrain: string,
+  rarity: string,
+  onFinish?: (data: any) => void
+): Promise<void> => {
+  const [contractAddress, contractName] = CONTRACT_ADDRESSES.LAND_NFT.split('.');
+
+  const functionArgs = [
+    intCV(x),
+    intCV(y),
+    stringAsciiCV(terrain),
+    stringAsciiCV(rarity),
+  ];
+
+  const txOptions = {
+    contractAddress,
+    contractName,
+    functionName: 'mint-land',
+    functionArgs,
+    network: getNetwork(),
+    appDetails: {
+      name: 'P2E Gaming Platform',
+      icon: window.location.origin + '/favicon.ico',
+    },
+    onFinish: (data: any) => {
+      console.log('Land minting transaction:', data);
+      if (onFinish) onFinish(data);
+    },
+  };
+
+  await openContractCall(txOptions);
 };

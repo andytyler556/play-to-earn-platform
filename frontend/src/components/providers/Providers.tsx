@@ -4,6 +4,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { WalletProvider } from './WalletProvider';
 import { GameProvider } from './GameProvider';
+import { SecurityProvider } from '../security/SecurityProvider';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -22,12 +23,14 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <QueryClientProvider client={queryClient}>
-      <WalletProvider>
-        <GameProvider>
-          {children}
-        </GameProvider>
-      </WalletProvider>
-    </QueryClientProvider>
+    <SecurityProvider>
+      <QueryClientProvider client={queryClient}>
+        <WalletProvider>
+          <GameProvider>
+            {children}
+          </GameProvider>
+        </WalletProvider>
+      </QueryClientProvider>
+    </SecurityProvider>
   );
 }

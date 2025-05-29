@@ -12,7 +12,12 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "type-check": "tsc --noEmit",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\""
+    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,md}\"",
+    "security:check": "node ../scripts/security-check.js",
+    "security:audit": "npm audit && node ../scripts/security-check.js",
+    "security:keys": "node ../scripts/secure-key-manager.js",
+    "deploy:secure": "node ../scripts/secure-deploy.js",
+    "precommit": "npm run security:check && npm run lint"
   },
   "dependencies": {
     "next": "^14.0.0",
@@ -21,6 +26,8 @@
     "@stacks/connect": "^7.8.0",
     "@stacks/transactions": "^6.15.0",
     "@stacks/network": "^6.15.0",
+    "@stacks/blockchain-api-client": "^7.10.0",
+    "@stacks/auth": "^6.15.0",
 
 
     "zustand": "^4.4.0",
