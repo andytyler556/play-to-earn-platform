@@ -17,19 +17,22 @@ A comprehensive Play-to-Earn gaming platform built on the Stacks blockchain, fea
 ```
 stacks-p2e-platform/
 ├── contracts/              # Clarity smart contracts
-│   ├── sip009-nft.clar    # Land & Blueprint NFTs
-│   ├── marketplace.clar    # Decentralized marketplace
-│   └── game-rewards.clar   # Competition & reward system
+│   ├── contracts/
+│   │   ├── land-nft.clar          # Land NFT contract (SIP-009)
+│   │   ├── blueprint-nft.clar     # Blueprint NFT contract
+│   │   ├── marketplace.clar       # Decentralized marketplace
+│   │   ├── game-rewards.clar      # Competitions & rewards
+│   │   └── platform-token.clar    # Platform token (SIP-010)
+│   ├── tests/              # Comprehensive unit tests
+│   └── Clarinet.toml       # Clarinet configuration
 ├── frontend/               # React/Next.js application
-│   ├── components/         # Reusable UI components
-│   ├── pages/             # Next.js pages
-│   ├── hooks/             # Custom React hooks
-│   └── utils/             # Utility functions
-├── backend/                # Node.js API server
-│   ├── routes/            # API endpoints
-│   ├── models/            # Data models
-│   └── services/          # Business logic
-└── docs/                  # Documentation
+│   ├── src/
+│   │   ├── app/           # Next.js 14 App Router
+│   │   ├── components/    # React components
+│   │   ├── lib/          # Stacks integration
+│   │   └── styles/       # Tailwind CSS
+│   └── package.json
+└── README.md
 ```
 
 ### 🚀 Quick Start
